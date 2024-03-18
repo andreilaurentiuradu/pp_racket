@@ -2,15 +2,6 @@
 (require "suffix-tree.rkt")
 
 (provide (all-defined-out))
-;MIGHT DELETE LATER
-(define stree-1
-  '(((#\$))
-    ((#\a) ((#\$))
-           ((#\n #\a) ((#\$))
-                      ((#\n #\a #\$))))
-    ((#\b #\a #\n #\a #\n #\a #\$))
-    ((#\n #\a) ((#\$))
-               ((#\n #\a #\$)))))
 ; TODO 2
 ; Implementați o funcție care primește două cuvinte (liste
 ; de caractere) w1 și w2 și calculează cel mai lung prefix
@@ -21,10 +12,11 @@
 ; => '((#\w #\h) (#\y) (#\e #\n))
 ; Folosiți recursivitate pe coadă.
 (define (longest-common-prefix w1 w2)
-         (append (list (lcp-h w1 w2 '()))
-                 (list (drop w1 (length (lcp-h w1 w2 '()))))
-                 (list (drop w2 (length (lcp-h w1 w2 '()))))
-          );facem o lista de 3 liste
+   (append
+      (list (lcp-h w1 w2 '()))
+      (list (drop w1 (length (lcp-h w1 w2 '()))))
+      (list (drop w2 (length (lcp-h w1 w2 '()))))
+    );facem o lista de 3 liste
  )
 
 (define (concat-drop L1 L2 acc)
@@ -120,31 +112,45 @@
                   )
                   #t ; 1 daca sablonul este continut in eticheta
                  )
-                ((not(equal? (length(car (longest-common-prefix (get-branch-label(first-branch st
-                                                                              )
-                                                             )
-                                                             pattern
-                                      )
-                                 )
-                           ); lungimea prefixului comun
-                          (length(get-branch-label(first-branch st
-                                                   )
-                                  )
-                                                             
-                           ) ; lungimea etichetei
+                ((equal?  (car (longest-common-prefix
+                                     (get-branch-label(first-branch st))
+                                     pattern
+                                   )
+                          )
+                          (get-branch-label(first-branch st))
+                  )
+                                               
+                            ;(and (displayln (list (get-branch-label(first-branch st)) pattern))                     
+                                               
+                     (list
+                        (get-branch-label(first-branch st))
+                        (caddr(longest-common-prefix
+                                  (get-branch-label(first-branch st))
+                                  pattern
+                              )
+                         )
+                         (get-branch-subtree(get-ch-branch st (car pattern)))
+                     )
+                 ) ; 2 daca eticheta e continuta in sablon mai cautam in subtree continuarea
+
+                ((not(equal? (length(car (longest-common-prefix
+                                             (get-branch-label(first-branch st))
+                                             pattern
+                                          )
+                                     )
+                              ); lungimea prefixului comun
+                             (length(get-branch-label(first-branch st))) ; lungimea etichetei                                        
                       )
                    )
-                  (list #f (car (longest-common-prefix (get-branch-label(first-branch st
-                                                                         )
-                                                        )
-                                                        pattern
+                  (list #f (car (longest-common-prefix
+                                    (get-branch-label(first-branch st))
+                                    pattern
                                  )
                             )
                    )
                  ) ;3 daca eticheta nu este continuta integral in sablon
-                   
-                (else (case2 st pattern '())) ; 2 daca eticheta e continuta in sablon mai cautam in subtree continuarea
-            )
+                 (else (list #f '()))
+              )
             (match-pattern-with-label (other-branches st) pattern) ;cautam alta ramura
         )
          
@@ -153,74 +159,17 @@
  )
 
 
- (define (case2 st pattern acc)
-   (if (not(= (length pattern) 0))
-      (if (equal? (car (longest-common-prefix (get-branch-label(first-branch st
-                                                                )
-                                               )
-                                               pattern
-                        )
-                   ) 
-                   (get-branch-label(first-branch st
-                                     )
-                    )
-            ) ; daca toata eticheta e continuta de sablon
-           (case2 (get-branch-subtree st)
-                  (cadr (longest-common-prefix (get-branch-label(first-branch st
-                                                                )
-                                               )
-                                               pattern
-                        )
-                   )
-                  (append (car (longest-common-prefix (get-branch-label(first-branch st
-                                                                        )
-                                                       )
-                                                       pattern
-                                )
-                                                  
-                           )
-                           (list acc)
-                   )
-            ) ; 2 daca eticheta este continuta in sablon mai avem de cautat in subtreeul de sub eticheta
-            (list #f acc) ; nu e continuta complet in continuare
-       )
-       st
-  )
-)
 ; TODO 5
 ; Implementați funcția st-has-pattern? care primește un
 ; arbore de sufixe și un șablon și întoarce true dacă șablonul
 ; apare în arbore, respectiv false în caz contrar.
+
 (define (st-has-pattern? st pattern)
-     ; daca inca a ramas o bucata din pattern de cautat
-    (if (not (null? pattern)
-         ) 
-               ; cat timp st-ul nu e null(daca e null intoarcem false)
-              (if (not (null? st)
-                   )
-                   ; verificam cat din pattern e continut pana atunci
-                   (if (equal? (car (longest-common-prefix (get-branch-label(get-ch-branch st (car pattern)
-                                                                             )
-                                                            )
-                                                            pattern
-                                     )
-                                )
-                                (get-branch-label(get-ch-branch st (car pattern)
-                                                  )
-                                 )
-                                
-                        )
-                        (st-has-pattern? st (drop pattern (length(get-branch-label(get-ch-branch st (car pattern
-                                                                                                     )
-                                                                                   )
-                                                                  )
-                                                           )
-                                             )
-                         )
-                        #f
-                    )
-                    #f
-               )
-        #t
-     )
+     (if (equal? (match-pattern-with-label st pattern) #t)
+         #t
+         (if (not(car (match-pattern-with-label st pattern)))
+           #f
+           (st-has-pattern? (caddr(match-pattern-with-label st pattern)) (cadr(match-pattern-with-label st pattern)))
+         )
+      )
  )
