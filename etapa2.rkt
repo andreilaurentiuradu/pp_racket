@@ -183,12 +183,13 @@
 ; text->ast și text->cst.
 
 
-(define (text->st text)
-  (lambda (labeling-func)
-    (let* ((text-with-$ (append text (list #\$))) ;textul cu $
-           (get-alphabet (sort (remove-duplicates text-with-$ char=?) char<?))) ; literele din text sortate crescator
-      (suffixes->st labeling-func (get-suffixes text-with-$) get-alphabet)))) ; arborele
-
+(define text->st
+  (lambda (text)
+    (lambda (labeling-func)
+      (let* ((text-with-$ (append text (list #\$))) ;textul cu $
+             (get-alphabet (sort (remove-duplicates text-with-$ char=?) char<?))) ; literele din text sortate crescator
+        (suffixes->st labeling-func (get-suffixes text-with-$) get-alphabet)))) ; arborele
+  )
 ; b) Din funcția text->st derivați funcția text->ast care
 ; primește un text (listă de caractere) și întoarce AST-ul
 ; asociat textului.
