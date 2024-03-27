@@ -1,0 +1,37 @@
+; TODO 5
+; Implementați funcția st-has-pattern? care primește un
+; arbore de sufixe și un șablon și întoarce true dacă șablonul
+; apare în arbore, respectiv false în caz contrar.
+(define (st-has-pattern? st pattern)
+     ; daca inca a ramas o bucata din pattern de cautat
+    (if (not (null? pattern)
+         ) 
+               ; cat timp st-ul nu e null(daca e null intoarcem false)
+              (if (not (null? st)
+                   )
+                   ; verificam cat din pattern e continut pana atunci
+                   (if (equal? (car (longest-common-prefix (get-branch-label(get-ch-branch st (car pattern)
+                                                                             )
+                                                            )
+                                                            pattern
+                                     )
+                                )
+                                (get-branch-label(get-ch-branch st (car pattern)
+                                                  )
+                                 )
+                                
+                        )
+                        (st-has-pattern? st (drop pattern (length(get-branch-label(get-ch-branch st (car pattern
+                                                                                                     )
+                                                                                   )
+                                                                  )
+                                                           )
+                                             )
+                         )
+                        #f
+                    )
+                    #f
+               )
+        #t
+     )
+ )

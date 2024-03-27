@@ -1,0 +1,30 @@
+- Întâi veți rezolva sarcinile din fișierul suffix-tree.rkt, apoi pe cele din fișierul etapa1.rkt.
+
+- Pentru testare, rulați codul din checker.rkt. Nu este permis să modificați acest fișier.
+
+- Fișierul pretty-print.rkt vă permite să vizualizați arbori de sufixe de dimensiune mică, odată ce ați implementat funcțiile din suffix-tree.rkt. Puteți ignora acest fișier, dacă doriți. El vă este furnizat doar pentru a vă ajuta să înțelegeți structura arborilor de sufixe (și eventual ca unealtă de debug).
+
+- Folosiți let* pentru un cod mai lizibil și mai eficient (găsiți explicații despre let* în fișierul let-star.txt).
+
+(cond 
+          ((st-empty? st) #f
+            );daca ramura e nula
+          ((equal? (get-branch-label (first-branch st)) ch  
+                    ) ;daca nu e lista si am gasit subtree-ul
+            st
+            ) ;returnam subtree-ul
+          ;((list? (get-branch-label (first-branch st)
+                  ; )
+           ; ) ;daca e lista
+           ; (get-ch-branch st ch)
+          ; )
+          (else
+          
+             (pretty-print st)
+             (get-ch-branch (get-branch-subtree st) ch)
+           ) ;altfel luam restul ramurilor
+       )
+        ; (pretty-print st)
+        ;(if (st-empty? st)'()
+               ; (get-ch-branch (get-branch-subtree st) ch)
+            ; )
