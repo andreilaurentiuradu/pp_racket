@@ -51,42 +51,40 @@
 ; marcajul de final $ pentru a nu crește artificial lungimea 
 ; șirului comun cu acest caracter.
 ; Hint: Revizitați funcția match-pattern-with-label (etapa 1).
-(define (lcs-helper text1 text2 ans)
+(define (longest-common-substring text1 text2)
     (let traverse-suffixes (
-                            (st1 (text->cst text1)) ; arborele de sufixe pentru primul text
-                            (suffixes (get-suffixes text2)) ; sufixele pentru textul2
+                            (current-text text2)
+                            (result '())
                             )
-      (let* (
+       (let* (
+             (st1 (text->cst text1)) ; arborele de sufixe pentru primul text
+             (suffixes (get-suffixes current-text)) ; sufixele pentru textul2
              (current-common-string (foldl (lambda(x acc)   ; facem o lista care va contine cel mai bun sufix al text2 care apare in text1           
-                     (if(and
-                         (not (null? x)) ; nu e null sufixul
-                         (st-has-pattern? st1 x) ; apare in arborele de sufixe al text1
-                         (> (length x) (length acc)) ; are lungimea mai mare decat cea de pana acum
-                         )
-                        x
-                        acc
-                        )
-                     )
+                                             (if(and
+                                                 (not (null? x)) ; nu e null sufixul
+                                                 (st-has-pattern? st1 x) ; apare in arborele de sufixe al text1
+                                                 (> (length x) (length acc)) ; are lungimea mai mare decat cea de pana acum
+                                                 )
+                                                x
+                                                acc
+                                                )
+                                             )
             
-                   '()
-                   suffixes
-                   )
+                                           '()
+                                           suffixes
+                                           )
                )
             )
-            (if (null? text2) ; apelam recursiv pentru toate prefixele lui text2
-                  ans
-                  (if (< (length current-common-string) (length ans)) ; daca am gasit unul cu lungimea mai buna
-                      (lcs-helper text1 (drop-right text2 1) ans)
-                      (lcs-helper text1 (drop-right text2 1) current-common-string)
+        
+            (if (null? current-text) ; apelam recursiv pentru toate prefixele lui text2
+                  result
+                  (if (< (length current-common-string) (length result)) ; daca am gasit unul cu lungimea mai buna
+                      (traverse-suffixes (drop-right current-text 1) result)
+                      (traverse-suffixes (drop-right current-text 1) current-common-string)
                    )        
              )
        )
-
-      
     )     
- )
-(define (longest-common-substring text1 text2)  
-   (lcs-helper text1 text2 '()) ; folosim recursivitate pe stiva cu un acumulator in care retinem raspunsul de pana atunci
  )
 
 
