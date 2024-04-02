@@ -60,28 +60,29 @@
              (st1 (text->cst text1)) ; arborele de sufixe pentru primul text
              (suffixes (get-suffixes current-text)) ; sufixele pentru textul2
              (current-common-string (foldl (lambda(x acc)   ; facem o lista care va contine cel mai bun sufix al text2 care apare in text1           
-                                             (if(and
-                                                 (not (null? x)) ; nu e null sufixul
-                                                 (st-has-pattern? st1 x) ; apare in arborele de sufixe al text1
-                                                 (> (length x) (length acc)) ; are lungimea mai mare decat cea de pana acum
+                                             (if(and (not (null? x)) ; nu e null sufixul
+                                                     (st-has-pattern? st1 x) ; apare in arborele de sufixe al text1
+                                                     (> (length x) (length acc)) ; are lungimea mai mare decat cea de pana acum
                                                  )
-                                                x
-                                                acc
-                                                )
-                                             )
+                                                 x
+                                                 acc
+                                              )
+                                            )
             
                                            '()
                                            suffixes
-                                           )
+                                     )
                )
             )
         
             (if (null? current-text) ; apelam recursiv pentru toate prefixele lui text2
                   result
-                  (if (< (length current-common-string) (length result)) ; daca am gasit unul cu lungimea mai buna
-                      (traverse-suffixes (drop-right current-text 1) result)
-                      (traverse-suffixes (drop-right current-text 1) current-common-string)
-                   )        
+                  (let ((new-text(drop-right current-text 1)))
+                       (if (< (length current-common-string) (length result)) ; daca am gasit unul cu lungimea mai buna
+                           (traverse-suffixes new-text result)
+                           (traverse-suffixes new-text current-common-string)
+                        )
+                   )
              )
        )
     )     
@@ -105,4 +106,33 @@
 ; Folosiți interfața definită în fișierul suffix-tree
 ; atunci când manipulați arborele.
 (define (repeated-substring-of-given-length text len)
-  'your-code-here)
+    (let manipulate-subtree
+         (
+          (st (text->cst text)) ; arborele
+          (result '()) ; stocam prefixul in result, pe care il initializam cu null         
+          )
+      
+      (if (st-empty? st) ; verificam daca am ajuns la arborele null  
+          #f ; daca am ajuns pe null inseamna ca nu exista un astfel de cuvant
+          (let* (
+                 (current-branch (first-branch st)) ; ramura curenta               
+                 (current-label (get-branch-label current-branch)) ; eticheta curenta                 
+                 (current-subtree (get-branch-subtree current-branch)) ; subarborele curent                 
+                 (current-prefix (append result current-label)) ; prefixul current(adaugam la ce am gasit pana acum eticheta curenta)
+                 (new-length (length current-prefix)) ; lungimea noului prefix
+                 )
+           
+                (if (and
+                     (>= new-length len) ; daca am gasit un cuvant care se repeta care are lungimea cel putin len
+                     (not (st-empty? current-subtree)) ; daca subarborele nu e null vrem sa continuam deplasarea
+                     (not (null? (other-branches current-subtree))) ;daca mai avem cel putin 1 branch pe langa first
+                     )
+                    (take current-prefix len) ; luam primele len caractere din prefixul gasit
+                    (or (manipulate-subtree current-subtree current-prefix) ; ne deplasam pe subarbore (actualizam st si result)
+                        (manipulate-subtree (other-branches st) result))  ; ne deplasam pe celelalte ramuri (actualizam st si result)
+                    ;or o sa intoarca #f sau rezultatul gasit
+                )
+            )
+          )
+      )
+)
