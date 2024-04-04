@@ -55,15 +55,20 @@
 ; este mai bine (înseamnă că design-ul inițial a fost bun).
 
 (define (longest-common-prefix w1 w2)
-   (append
-      (list (lcp-h w1 w2 '()))
-      (list (drop w1 (length (lcp-h w1 w2 '()))))
-      (list (drop w2 (length (lcp-h w1 w2 '()))))
+  (let* (
+           (pref (reverse(lcp-h w1 w2 '())))
+           (pref-length (length pref))
+         )
+      (cons pref
+            (cons (drop w2 pref-length)
+                  (list(drop w1 pref-length))
+             )
+       )
     );facem o lista de 3 liste
  )
 
 (define (concat-drop L1 L2 acc)
-     (lcp-h (cdr L1) (cdr L2) (append acc (list(car L1)))) ;apel recursiv
+     (lcp-h (cdr L1) (cdr L2) (cons (car L1) acc)) ;apel recursiv
   )
 
 (define (lcp-h L1 L2 acc)
@@ -84,7 +89,7 @@
  )
 
 (define (lcpl-helper words acc)
-  ;(displayln words)
+  
    (if (not (stream-empty? words)) ;daca streamul nu e nul
        (lcpl-helper (stream-rest words) ;restul cuvintelor
                     (car (longest-common-prefix (stream-first words) acc)
@@ -93,6 +98,72 @@
        acc
     )
  )
+
+
+
+(define (match-pattern-with-label st pattern)
+  (if (stream-empty? st)
+     (let* (
+            (label (get-branch-label(first-branch st)))
+            (lcp (longest-common-prefix label pattern))
+            (pref (car lcp))
+           )
+      (if (and
+             (not (null? pattern))
+              (equal? (car label)
+                  (car pattern))
+              ) ;daca eticheta si sablonul incep cu aceeasi litera avem 3 cazuri
+           (cond
+                ((equal?  pref
+                          pattern
+                  )
+                  #t ; 1 daca sablonul este continut in eticheta
+                 )
+                ((equal?  pref
+                          label)
+                     (list
+                        label
+                        (caddr lcp)
+                         (get-branch-subtree(get-ch-branch st (car pattern)))
+                     )
+                 ) ; 2 daca eticheta e continuta in sablon mai cautam in subtree continuarea
+
+                ((not(equal? (length pref); lungimea prefixului comun
+                             (length label) ; lungimea etichetei
+                      )
+                   )
+                  (list #f pref)
+                 ) ;3 daca eticheta nu este continuta integral in sablon
+                 (else (list #f '()))
+              )
+            (match-pattern-with-label (other-branches st) pattern) ;cautam alta ramura
+        )
+       )
+
+       (list #f '()) ; nu gasim o ramura cu aceeasi eticheta ca sablonul
+  )
+ )
+
+
+(define (st-has-pattern? st pattern)
+  (let (
+        (result (match-pattern-with-label st pattern))
+        )
+     (if (equal?  result #t)
+         #t
+         (if 
+             (equal?
+                   (car result)
+                   #f
+                 )
+                
+           #f
+           (st-has-pattern? (caddr result) (cadr result))
+         )
+      )
+    )
+ )
+
 
 (define (get-suffixes text)
         (if (and
@@ -116,7 +187,8 @@
       )
   )
  )
-)
+ )
+
 (define (get-ch-words words ch)
   
   (stream-foldr (lambda(w acc) ; mereu 2 parametrii, elementul curent si acumulatorul
@@ -132,6 +204,7 @@
           words
    )
  )
+
 
 (define (ast-func suffixes)
   (cons
@@ -173,7 +246,7 @@
        )
    ) ; primul cons creeaza branchul, al doilea il leaga la arbore
 
-  (stream-foldr (lambda (ch st) (process-alphabet ch st)) empty-stream alphabet)
+  (foldr (lambda (ch st) (process-alphabet ch st)) empty-stream alphabet)
   ; se face concatenarea (functia din foldr o sa intoarca in final branchurile pentru fiecare litera valida)
  )
 
@@ -198,30 +271,17 @@
  )
 
 
-;;;;;;;;;;;;;;;;;;DE AICI INCEP TASKURILE 3-4
-
-(define (match-pattern-with-label st pattern)
-  1
- )
-
-
-(define (st-has-pattern? st pattern)
-     2
- )
 
 ; dacă ați respectat bariera de abstractizare,
 ; această funcție va rămâne nemodificată.
 (define (substring? text pattern)
   ;(let * (
-         ; (ast (text->ast text))
-        ; )
-        ;(st-has-pattern?  ast pattern)
-    2
+         ; (text->ast text)
+       ;  )
+       ; (st-has-pattern?  ast pattern)
   ;)
+  2
  )
-
-
-;;;;;;;;;;;;DE AICI AI TASKU 4
 
 
 ; dacă ați respectat bariera de abstractizare,
