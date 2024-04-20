@@ -85,14 +85,14 @@
 ; am schimbat, în numele funcției, cuvântul list în
 ; cuvântul collection
 (define (longest-common-prefix-of-collection words)
-   (lcpl-helper (stream-rest words) (stream-first words)) ;avem primul cuvant ca "prefixul curent" (vom parcurge restul cuvintelor)
+   (lcpl-helper (collection-rest words) (collection-first words)) ;avem primul cuvant ca "prefixul curent" (vom parcurge restul cuvintelor)
  )
 
 (define (lcpl-helper words acc)
   
-   (if (not (stream-empty? words)) ;daca streamul nu e nul
-       (lcpl-helper (stream-rest words) ;restul cuvintelor
-                    (car (longest-common-prefix (stream-first words) acc)
+   (if (not (collection-empty? words)) ;daca collectionul nu e nul
+       (lcpl-helper (collection-rest words) ;restul cuvintelor
+                    (car (longest-common-prefix (collection-first words) acc)
                      ) ;prefixul comun dintre "prefixul curent" si urmatorul cuvant
        );apelul recursiv
        acc
@@ -102,7 +102,7 @@
 
 
 (define (match-pattern-with-label st pattern)
-  (if (stream-empty? st)
+  (if (collection-empty? st)
      (let* (
             (label (get-branch-label(first-branch st)))
             (lcp (longest-common-prefix label pattern))
@@ -174,16 +174,16 @@
                      )
                  )
              )
-            (stream-cons text (get-suffixes (cdr text))) ; facem lista din text si listele anterioare(sufixele mai mici)
-            (stream text) ; cazul de baza intoarce lista ($) la care se concateneaza
+            (collection-cons text (get-suffixes (cdr text))) ; facem lista din text si listele anterioare(sufixele mai mici)
+            (collection text) ; cazul de baza intoarce lista ($) la care se concateneaza
          )
   )
 
-(define (stream-foldr f init stream)
-  (if(stream-empty? stream)
+(define (collection-foldr f init collection)
+  (if(collection-empty? collection)
      init
-     (f (stream-first stream)
-        (stream-foldr f init (stream-rest stream)
+     (f (collection-first collection)
+        (collection-foldr f init (collection-rest collection)
       )
   )
  )
@@ -191,16 +191,16 @@
 
 (define (get-ch-words words ch)
   
-  (stream-foldr (lambda(w acc) ; mereu 2 parametrii, elementul curent si acumulatorul
+  (collection-foldr (lambda(w acc) ; mereu 2 parametrii, elementul curent si acumulatorul
             (if (and
                   (not (null? w)) ; cuvantul sa nu fie null
                   (equal? ch (car w)) ; sa inceapa cu caracterul ch
                  )
-                 (stream-cons w acc)
+                 (collection-cons w acc)
                  acc
              )
            )
-          empty-stream
+          empty-collection
           words
    )
  )
@@ -208,8 +208,8 @@
 
 (define (ast-func suffixes)
   (cons
-     (list(car(stream-first suffixes))) ; lista formata din primul caracter
-     (stream-map (lambda(x) (cdr x)) suffixes)) ; lista formata din restul cuvintelor
+     (list(car(collection-first suffixes))) ; lista formata din primul caracter
+     (collection-map (lambda(x) (cdr x)) suffixes)) ; lista formata din restul cuvintelor
   )
 
 
@@ -221,7 +221,7 @@
        
        (cons  ; functia pentru care folosim asocierile
           lcp-list
-          (stream-map (lambda(x) (drop x (length lcp-list))) suffixes)
+          (collection-map (lambda(x) (drop x (length lcp-list))) suffixes)
         )
    )
  )
@@ -232,7 +232,7 @@
 ; de sufixe)
 (define (suffixes->st labeling-function suffixes alphabet)
   (define (process-alphabet ch st) ; in st vom pastra arborele, iar in ch litera la care am ajuns din alfabet
-      (if (stream-empty? (get-ch-words suffixes ch)) ; verifica daca exista sufixe care incep cu ch
+      (if (collection-empty? (get-ch-words suffixes ch)) ; verifica daca exista sufixe care incep cu ch
           st ; daca nu exista lasam branchul la fel
           (let* (
                  (get-ch-suffixes (get-ch-words suffixes ch)) ; sufixele care incep cu caracterul ch
@@ -241,12 +241,12 @@
                  (get-subtree (suffixes->st labeling-function get-new-suffixes alphabet)) ;apelul recursiv pentru crearea arborelui din noile sufixe
                  (get-branch (cons get-label get-subtree))
                  ) ; se leaga eticheta si se apeleaza recursiv pentru a se adauga etichetele urmatoare
-                 (stream-cons get-branch st)
+                 (collection-cons get-branch st)
            )
        )
    ) ; primul cons creeaza branchul, al doilea il leaga la arbore
 
-  (foldr (lambda (ch st) (process-alphabet ch st)) empty-stream alphabet)
+  (foldr (lambda (ch st) (process-alphabet ch st)) empty-collection alphabet)
   ; se face concatenarea (functia din foldr o sa intoarca in final branchurile pentru fiecare litera valida)
  )
 
@@ -289,7 +289,7 @@
 (define (repeated-substring-of-given-length text len)
   (let manipulate-subtree
          (
-          (st (text->cst text)) ; arborele
+        (st (text->cst text)) ; arborele
           (result '()) ; stocam prefixul in result, pe care il initializam cu null         
           )
       
@@ -299,7 +299,7 @@
                  (current-branch (first-branch st)) ; ramura curenta               
                  (current-label (get-branch-label current-branch)) ; eticheta curenta                 
                  (current-subtree (get-branch-subtree current-branch)) ; subarborele curent                 
-                 (current-prefix (append result current-label)) ; prefixul current(adaugam la ce am gasit pana acum eticheta curenta)
+                (current-prefix (append result current-label)) ; prefixul current(adaugam la ce am gasit pana acum eticheta curenta)
                  (new-length (length current-prefix)) ; lungimea noului prefix
                  )
            
@@ -316,4 +316,6 @@
             )
           )
       )
+  
   )
+; TASK 4 imi da timeout pe vmchecker si nu imi arata punctajul. Am trimis doar primele doua taskuri pentru a lua punctajul
