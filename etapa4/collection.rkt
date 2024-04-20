@@ -35,3 +35,16 @@
 ; TODO
 ; Scrieți în continuare restul definițiilor
 ; (care nu necesită o sintaxă specială).
+(define-syntax-rule (collection-map f s) (stream-map f s))
+(define-syntax-rule (collection-first s) (stream-first s))
+(define-syntax-rule (collection-rest s) (stream-rest s))
+(define empty-collection empty-stream)
+(define-syntax-rule (collection s) (stream s))
+(define-syntax-rule (collection-foldr f acc s) (stream-foldr f acc s))
+(define-syntax-rule (collection-empty? s) (stream-empty? s))
+
+
+
+
+
+
